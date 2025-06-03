@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request
-from .solver import solve
+from solver import solve
 
 app = FastAPI()
 

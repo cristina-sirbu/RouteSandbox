@@ -29,18 +29,43 @@ This project is a personal learning initiative.
 
 ---
 
-## 📦 Features (Planned)
+## Features (Planned)
 
-- [ ] Parcel and vehicle simulation with delivery constraints
+- [x] Parcel and vehicle simulation with delivery constraints
 - [ ] Greedy baseline and advanced optimization strategies
-- [ ] Python microservice for solving VRPs using OR-Tools
+- [x] Python microservice for solving VRPs using OR-Tools
 - [ ] REST APIs for submitting and retrieving route plans
 - [ ] Simulation metrics (delivery success, total distance, time)
 - [ ] Cloud deployment via Kubernetes and GitHub Actions
 - [ ] Optional dashboard for visualizing routes and KPIs
 
+---
 
-## 📚 Docs & Architecture
+## Instructions
+
+To build the optimizer app Docker image run:
+
+```shell
+docker build -t routesandbox-optimizer optimizer/
+```
+
+To run the image:
+
+```shell
+docker run -p 8000:8000 routesandbox-optimizer
+```
+
+To check locally if the image works:
+
+```shell
+curl -X POST http://localhost:8000/optimize \
+  -H "Content-Type: application/json" \
+  --data-binary @data/sample_problems/example.json
+```
+
+---
+
+## Docs & Architecture
 
 > Coming soon:
 > - ADRs (Architectural Decision Records)
