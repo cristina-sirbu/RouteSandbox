@@ -99,7 +99,35 @@ def solve(problem_data: dict) -> dict:
                 "arrival_time": arrival
             })
 
-            routes.append({"vehicle_id": vehicle_id + 1, "stops": route})
+            start_time = route[0]["arrival_time"]
+            end_time = route[-1]["arrival_time"]
+            delivery_stops = [stop for stop in route if stop["location_id"] != 0]
+
+            # Calculate the late arrivals
+            late_count = 0
+            for stop in route:
+                loc_id = stop["location_id"]
+                arrival = stop["arrival_time"]
+                if loc_id != 0:  # ignore depot
+                    start, end = data["time_windows"][loc_id]
+                    if arrival > end:
+                        late_count += 1
+
+            # Calculate total distance for each vehicle
+            total_distance = 0
+            for i in range(len(route) - 1):
+                from_id = route[i]["location_id"]
+                to_id = route[i + 1]["location_id"]
+                total_distance += data["distance_matrix"][from_id][to_id]
+
+            routes.append({
+                "vehicle_id": vehicle_id + 1,
+                "total_delivery_time": end_time - start_time,
+                "parcels_delivered": len(delivery_stops),
+                "late_deliveries": late_count,
+                "total_distance": total_distance,
+                "stops": route
+            })
         return routes
 
     if solution:
