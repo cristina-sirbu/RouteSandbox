@@ -1,0 +1,14 @@
+{
+  "routes": [
+    {
+      "vehicle_id": 1,
+      "stops": [
+        { "location_id": 0, "arrival_time": 8 },
+        { "location_id": 1, "arrival_time": 9 },
+        { "location_id": 2, "arrival_time": 11 },
+        { "location_id": 0, "arrival_time": 13 }
+      ]
+    }
+  ],
+  "status": "success"
+}

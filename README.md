@@ -34,7 +34,7 @@ This project is a personal learning initiative.
 - [x] Parcel and vehicle simulation with delivery constraints
 - [ ] Greedy baseline and advanced optimization strategies
 - [x] Python microservice for solving VRPs using OR-Tools
-- [ ] REST APIs for submitting and retrieving route plans
+- [x] REST APIs for submitting and retrieving route plans
 - [ ] Simulation metrics (delivery success, total distance, time)
 - [ ] Cloud deployment via Kubernetes and GitHub Actions
 - [ ] Optional dashboard for visualizing routes and KPIs
@@ -61,6 +61,30 @@ To check locally if the image works:
 curl -X POST http://localhost:8000/optimize \
   -H "Content-Type: application/json" \
   --data-binary @data/sample_problems/example.json
+```
+
+---
+
+### Debugging the route
+
+`visualize.py` is a small tool designed to help during development to visually inspect and compare delivery routes produced
+by the optimizer service.
+
+It generates a simple directed graph of each vehicle's route using `networkx` and `matplotlib`.
+
+#### How to run the debug tool?
+
+Under `/optimizer` there is a `sample_output.json` file. Update it with the result you've got from the `backend` service.
+To start the visualizing tool:
+
+```shell
+python optimizer/visualize.py
+```
+
+Before running the script, make sure you've installed the required libraries:
+
+```shell
+pip install matplotlib networkx
 ```
 
 ---
