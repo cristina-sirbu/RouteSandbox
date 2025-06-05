@@ -3,6 +3,7 @@ from solver import solve, solve_greedy
 
 app = FastAPI()
 
+
 @app.post("/optimize")
 async def optimize(request: Request, solver: str = "ortools"):
     data = await request.json()
