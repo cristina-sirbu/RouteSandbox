@@ -1,0 +1,30 @@
+@startuml RouteSandboxArchitecture
+title RouteSandbox Architecture
+
+skinparam linetype ortho
+
+actor "Developer\n(curl / Postman)" as Dev
+actor "Data Analyst\n(Jupyter Notebook)" as Analyst
+
+[Java Backend Service] as Backend
+[Python Optimizer Service] as Optimizer
+[JSON Data\n(example.json)] as InputData
+[Optimizer Output\n(sample_output.json)] as OutputData
+
+Dev --> Backend : API Call
+Backend --> Optimizer : Forward\n request
+Optimizer --> InputData : Read\n problem
+Optimizer --> OutputData : Write\n solution
+Optimizer --> Backend : Return route\n plan
+Backend --> Dev : Return response
+
+
+[visualize.py\n(Route Graph)] as Visualizer
+[analyze_routes.ipynb\n(Metrics Notebook)] as Notebook
+
+
+Visualizer --> OutputData : Read\n output
+Notebook --> OutputData : Read\n output
+
+Analyst --> Notebook : Run analysis
+@enduml

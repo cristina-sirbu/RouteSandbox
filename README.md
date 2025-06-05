@@ -14,18 +14,9 @@ This project is a personal learning initiative.
 
 ---
 
-## Tech Stack
+## Architecture
 
-| Area                    | Technology Used                                    |
-|-------------------------|----------------------------------------------------|
-| **Backend API**         | Java (Spring Boot)                                 |
-| **Optimization Engine** | Python (FastAPI) with Google OR-Tools              |
-| **Containerization**    | Docker                                             |
-| **Local Orchestration** | Kubernetes (via Minikube)                          |
-| **API Communication**   | REST (HTTP/JSON)                                   |
-| **CI/CD**               | GitHub Actions (build, lint, test)                 |
-| **Simulation Data**     | JSON files (in-memory, no external DB)             |
-| **Ingress & Routing**   | Minikube Ingress addon *or* `kubectl port-forward` |
+![Architecture](diagrams/RouteSandboxArchitecture.png)
 
 ---
 
@@ -207,14 +198,6 @@ Run all cells to view tables and comparison charts.
 ![3](./imgs/3.png)
 
 ![4](./imgs/4.png)
-
----
-
-## Docs & Architecture
-
-> Coming soon:
-> - ADRs (Architectural Decision Records)
-> - Architecture diagrams (services, data flow)
 
 ---
 
