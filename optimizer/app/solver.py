@@ -260,7 +260,7 @@ def print_routes(routes, locations):
     for route in routes:
         vehicle_id = route["vehicle_id"]
         stop_ids = route["stops"]
-        print(f"🚚 Vehicle {vehicle_id}")
+        print(f"Vehicle {vehicle_id}")
         for stop in stop_ids:
             name = locations[stop["location_id"]]["name"]
 
