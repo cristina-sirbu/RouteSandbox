@@ -46,13 +46,97 @@ docker run -p 8000:8000 routesandbox-optimizer
 To check locally if the image works:
 
 ```shell
-curl -X POST http://localhost:8000/optimize \
+curl -X POST http://localhost:8000/optimize\?solver\=greedy \
   -H "Content-Type: application/json" \
   --data-binary @data/sample_problems/example.json
 ```
+<details>
+<summary>Example input file:</summary>
 
-After you have the optimizer up and running, you can use the instructions from [README.md](optimizer/README.md) to do a
-visual comparison between OR-Tools and the Greedy algorithm.
+   ```json
+   {
+     "locations": [
+       { "id": 0, "name": "Depot" },
+       { "id": 1, "name": "Customer A" },
+       { "id": 2, "name": "Customer B" },
+       { "id": 3, "name": "Customer C" }
+     ],
+     "distance_matrix": [
+       [0, 2, 3, 4],
+       [2, 0, 1, 3],
+       [3, 1, 0, 2],
+       [4, 3, 2, 0]
+     ],
+     "parcels": [
+       { "id": 1, "location_id": 1, "time_window": [9, 12], "demand": 1 },
+       { "id": 2, "location_id": 2, "time_window": [10, 13], "demand": 1 },
+       { "id": 3, "location_id": 3, "time_window": [11, 14], "demand": 1 }
+     ],
+     "vehicles": [
+       { "id": 1, "start_index": 0, "capacity": 2, "working_hours": [8, 15] },
+       { "id": 2, "start_index": 0, "capacity": 2, "working_hours": [8, 15] }
+     ]
+   }
+   ```
+</details>
+
+<details>
+<summary>Example output:</summary>
+
+   ```json
+   {
+      "routes": [
+         {
+            "vehicle_id": 1,
+            "total_delivery_time": 6,
+            "parcels_delivered": 2,
+            "late_deliveries": 0,
+            "total_distance": 6,
+            "stops": [
+               {
+                  "location_id": 0,
+                  "arrival_time": 8
+               },
+               {
+                  "location_id": 1,
+                  "arrival_time": 10
+               },
+               {
+                  "location_id": 2,
+                  "arrival_time": 11
+               },
+               {
+                  "location_id": 0,
+                  "arrival_time": 14
+               }
+            ]
+         },
+         {
+            "vehicle_id": 2,
+            "total_delivery_time": 8,
+            "parcels_delivered": 1,
+            "late_deliveries": 0,
+            "total_distance": 8,
+            "stops": [
+               {
+                  "location_id": 0,
+                  "arrival_time": 8
+               },
+               {
+                  "location_id": 3,
+                  "arrival_time": 12
+               },
+               {
+                  "location_id": 0,
+                  "arrival_time": 16
+               }
+            ]
+         }
+      ],
+      "status": "success"
+   }
+   ```
+</details>
 
 ---
 
