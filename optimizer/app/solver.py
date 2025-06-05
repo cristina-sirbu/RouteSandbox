@@ -13,9 +13,7 @@ def solve(problem_data: dict) -> dict:
 
     # RoutingIndexManager takes as arguments how many locations there are, how many vehicles and which location is the starting point.
     manager = pywrapcp.RoutingIndexManager(
-        len(data["distance_matrix"]),
-        data["num_vehicles"],
-        data["depot"]
+        len(data["distance_matrix"]), data["num_vehicles"], data["depot"]
     )
     routing = pywrapcp.RoutingModel(manager)
 
@@ -39,7 +37,7 @@ def solve(problem_data: dict) -> dict:
         0,  # no capacity slack
         data["vehicle_capacities"],  # from input
         True,
-        "Capacity"
+        "Capacity",
     )
 
     # Each stop must be reached within a time range
@@ -55,7 +53,7 @@ def solve(problem_data: dict) -> dict:
         30,  # max waiting time at each stop
         1000,  # total time allowed on route
         False,
-        "Time"
+        "Time",
     )
 
     # Set this constrain for every location
@@ -63,7 +61,9 @@ def solve(problem_data: dict) -> dict:
     # This sets the depot’s time window as the valid time range for when each vehicle can leave.
     for vehicle_id in range(data["num_vehicles"]):
         index = routing.Start(vehicle_id)
-        time_dimension.CumulVar(index).SetRange(data["time_windows"][0][0], data["time_windows"][0][1])
+        time_dimension.CumulVar(index).SetRange(
+            data["time_windows"][0][0], data["time_windows"][0][1]
+        )
 
     for location_idx, time_window in enumerate(data["time_windows"]):
         index = manager.NodeToIndex(location_idx)
@@ -72,7 +72,8 @@ def solve(problem_data: dict) -> dict:
     # Tell solver how to start
     search_parameters = pywrapcp.DefaultRoutingSearchParameters()
     search_parameters.first_solution_strategy = (
-        routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC)
+        routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
+    )
     solution = routing.SolveWithParameters(search_parameters)
 
     def get_routes(routing, manager, solution, time_dimension):
@@ -84,20 +85,14 @@ def solve(problem_data: dict) -> dict:
                 node_index = manager.IndexToNode(index)
                 arrival = solution.Value(time_dimension.CumulVar(index))
 
-                route.append({
-                    "location_id": node_index,
-                    "arrival_time": arrival
-                })
+                route.append({"location_id": node_index, "arrival_time": arrival})
 
                 index = solution.Value(routing.NextVar(index))
 
             # Add the end (depot)
             end_node = manager.IndexToNode(index)
             arrival = solution.Value(time_dimension.CumulVar(index))
-            route.append({
-                "location_id": end_node,
-                "arrival_time": arrival
-            })
+            route.append({"location_id": end_node, "arrival_time": arrival})
 
             start_time = route[0]["arrival_time"]
             end_time = route[-1]["arrival_time"]
@@ -120,28 +115,25 @@ def solve(problem_data: dict) -> dict:
                 to_id = route[i + 1]["location_id"]
                 total_distance += data["distance_matrix"][from_id][to_id]
 
-            routes.append({
-                "vehicle_id": vehicle_id + 1,
-                "total_delivery_time": end_time - start_time,
-                "parcels_delivered": len(delivery_stops),
-                "late_deliveries": late_count,
-                "total_distance": total_distance,
-                "stops": route
-            })
+            routes.append(
+                {
+                    "vehicle_id": vehicle_id + 1,
+                    "total_delivery_time": end_time - start_time,
+                    "parcels_delivered": len(delivery_stops),
+                    "late_deliveries": late_count,
+                    "total_distance": total_distance,
+                    "stops": route,
+                }
+            )
         return routes
 
     if solution:
         routes = get_routes(routing, manager, solution, time_dimension)
         print_routes(routes, problem_data["locations"])
-        return {
-            "routes": routes,
-            "status": "success"
-        }
+        return {"routes": routes, "status": "success"}
     else:
-        return {
-            "routes": [],
-            "status": "no_solution"
-        }
+        return {"routes": [], "status": "no_solution"}
+
 
 def prepare_ortools_data(problem_data: dict) -> dict:
     distance_matrix = problem_data["distance_matrix"]
@@ -174,8 +166,9 @@ def prepare_ortools_data(problem_data: dict) -> dict:
         "depot": 0,
         "demands": demand,
         "vehicle_capacities": [v["capacity"] for v in vehicles],
-        "time_windows": time_windows
+        "time_windows": time_windows,
     }
+
 
 def solve_greedy(problem_data: dict) -> dict:
     """
@@ -184,15 +177,14 @@ def solve_greedy(problem_data: dict) -> dict:
     - Assign to first available vehicle with enough capacity
     - Sort stops by travel distance from depot
     """
-    distance_matrix =  problem_data["distance_matrix"]
+    distance_matrix = problem_data["distance_matrix"]
     parcels = problem_data["parcels"]
     vehicles = problem_data["vehicles"]
     depot_index = 0
-    num_locations = len(problem_data["locations"])
 
     # Track remaining capacity for each vehicle
     vehicle_capacity = [v["capacity"] for v in vehicles]
-    vehicle_routes = [[] for _ in vehicles] # list of location_ids per vehicle
+    vehicle_routes = [[] for _ in vehicles]  # list of location_ids per vehicle
 
     # Assign parcels to vehicles
     for parcel in parcels:
@@ -206,21 +198,21 @@ def solve_greedy(problem_data: dict) -> dict:
                 vehicle_capacity[i] -= demand
                 assigned = True
                 break
-        
+
         if not assigned:
-            print(f"Parcel {parcel['id']} could not be assigned due to capacity limits.")
+            print(
+                f"Parcel {parcel['id']} could not be assigned due to capacity limits."
+            )
 
     # Build routes and compute metrics
     routes = []
 
     for vehicle_id, stops in enumerate(vehicle_routes):
         if not stops:
-            continue # skip unused vehicles
+            continue  # skip unused vehicles
 
         # Sort by distance to get the nearest neightbor
         stops.sort()
-
-        full_route = [depot_index] + stops + [depot_index]
 
         total_distance = 0
         arrival_time = 0
@@ -231,10 +223,7 @@ def solve_greedy(problem_data: dict) -> dict:
         route_data = []
 
         # Start at depot
-        route_data.append({
-            "location_id": depot_index,
-            "arrival_time": arrival_time
-        })
+        route_data.append({"location_id": depot_index, "arrival_time": arrival_time})
 
         # Visit each stop (in order)
         for i in range(len(stops)):
@@ -243,35 +232,29 @@ def solve_greedy(problem_data: dict) -> dict:
             travel_time = distance_matrix[from_id][to_id]
             arrival_time += travel_time
             total_distance += travel_time
-            route_data.append({
-                "location_id": to_id,
-                "arrival_time": arrival_time
-            })
+            route_data.append({"location_id": to_id, "arrival_time": arrival_time})
 
         # Return to depot
         last_stop = stops[-1] if stops else depot_index
         return_time = arrival_time + distance_matrix[last_stop][depot_index]
         total_distance += distance_matrix[last_stop][depot_index]
-        route_data.append({
-            "location_id": depot_index,
-            "arrival_time": return_time
-        })
+        route_data.append({"location_id": depot_index, "arrival_time": return_time})
 
         total_delivery_time = return_time - start_time
 
-        routes.append({
-            "vehicle_id": vehicle_id + 1,
-            "total_delivery_time": route_data[-1]["arrival_time"] - 8,
-            "parcels_delivered": len(stops),
-            "late_deliveries": 0,
-            "total_distance": total_distance,
-            "stops": route_data
-        })
+        routes.append(
+            {
+                "vehicle_id": vehicle_id + 1,
+                "total_delivery_time": total_delivery_time,
+                "parcels_delivered": len(stops),
+                "late_deliveries": 0,
+                "total_distance": total_distance,
+                "stops": route_data,
+            }
+        )
 
-    return {
-        "routes": routes,
-        "status": "success"
-    }
+    return {"routes": routes, "status": "success"}
+
 
 def print_routes(routes, locations):
     for route in routes:
