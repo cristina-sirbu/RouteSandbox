@@ -2,11 +2,48 @@
   "routes": [
     {
       "vehicle_id": 1,
+      "total_delivery_time": 9,
+      "parcels_delivered": 2,
+      "late_deliveries": 0,
+      "total_distance": 9,
       "stops": [
-        { "location_id": 0, "arrival_time": 8 },
-        { "location_id": 1, "arrival_time": 9 },
-        { "location_id": 2, "arrival_time": 11 },
-        { "location_id": 0, "arrival_time": 13 }
+        {
+          "location_id": 0,
+          "arrival_time": 8
+        },
+        {
+          "location_id": 2,
+          "arrival_time": 11
+        },
+        {
+          "location_id": 3,
+          "arrival_time": 13
+        },
+        {
+          "location_id": 0,
+          "arrival_time": 17
+        }
+      ]
+    },
+    {
+      "vehicle_id": 2,
+      "total_delivery_time": 4,
+      "parcels_delivered": 1,
+      "late_deliveries": 0,
+      "total_distance": 4,
+      "stops": [
+        {
+          "location_id": 0,
+          "arrival_time": 8
+        },
+        {
+          "location_id": 1,
+          "arrival_time": 10
+        },
+        {
+          "location_id": 0,
+          "arrival_time": 12
+        }
       ]
     }
   ],

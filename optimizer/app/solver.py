@@ -3,7 +3,7 @@ from ortools.constraint_solver import pywrapcp, routing_enums_pb2
 
 def solve(problem_data: dict) -> dict:
     """
-    Solves the vehicle routing problem with the given input data.
+    Solves the vehicle routing problem with the given input data using OR-Tools.
     """
     data = prepare_ortools_data(problem_data)
 
@@ -175,6 +175,102 @@ def prepare_ortools_data(problem_data: dict) -> dict:
         "demands": demand,
         "vehicle_capacities": [v["capacity"] for v in vehicles],
         "time_windows": time_windows
+    }
+
+def solve_greedy(problem_data: dict) -> dict:
+    """
+    Solves the vehicle routing problem with the given input data using a greedy algorithm:
+    - Iterate over parcels
+    - Assign to first available vehicle with enough capacity
+    - Sort stops by travel distance from depot
+    """
+    distance_matrix =  problem_data["distance_matrix"]
+    parcels = problem_data["parcels"]
+    vehicles = problem_data["vehicles"]
+    depot_index = 0
+    num_locations = len(problem_data["locations"])
+
+    # Track remaining capacity for each vehicle
+    vehicle_capacity = [v["capacity"] for v in vehicles]
+    vehicle_routes = [[] for _ in vehicles] # list of location_ids per vehicle
+
+    # Assign parcels to vehicles
+    for parcel in parcels:
+        loc_id = parcel["location_id"]
+        demand = parcel["demand"]
+
+        assigned = False
+        for i, cap in enumerate(vehicle_capacity):
+            if demand <= cap:
+                vehicle_routes[i].append(loc_id)
+                vehicle_capacity[i] -= demand
+                assigned = True
+                break
+        
+        if not assigned:
+            print(f"Parcel {parcel['id']} could not be assigned due to capacity limits.")
+
+    # Build routes and compute metrics
+    routes = []
+
+    for vehicle_id, stops in enumerate(vehicle_routes):
+        if not stops:
+            continue # skip unused vehicles
+
+        # Sort by distance to get the nearest neightbor
+        stops.sort()
+
+        full_route = [depot_index] + stops + [depot_index]
+
+        total_distance = 0
+        arrival_time = 0
+        route_data = []
+
+        start_time = 8
+        arrival_time = start_time
+        route_data = []
+
+        # Start at depot
+        route_data.append({
+            "location_id": depot_index,
+            "arrival_time": arrival_time
+        })
+
+        # Visit each stop (in order)
+        for i in range(len(stops)):
+            from_id = depot_index if i == 0 else stops[i - 1]
+            to_id = stops[i]
+            travel_time = distance_matrix[from_id][to_id]
+            arrival_time += travel_time
+            total_distance += travel_time
+            route_data.append({
+                "location_id": to_id,
+                "arrival_time": arrival_time
+            })
+
+        # Return to depot
+        last_stop = stops[-1] if stops else depot_index
+        return_time = arrival_time + distance_matrix[last_stop][depot_index]
+        total_distance += distance_matrix[last_stop][depot_index]
+        route_data.append({
+            "location_id": depot_index,
+            "arrival_time": return_time
+        })
+
+        total_delivery_time = return_time - start_time
+
+        routes.append({
+            "vehicle_id": vehicle_id + 1,
+            "total_delivery_time": route_data[-1]["arrival_time"] - 8,
+            "parcels_delivered": len(stops),
+            "late_deliveries": 0,
+            "total_distance": total_distance,
+            "stops": route_data
+        })
+
+    return {
+        "routes": routes,
+        "status": "success"
     }
 
 def print_routes(routes, locations):
